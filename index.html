@@ -90,11 +90,11 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 <div class="page on" id="p-ov">
   <div class="sec">3月核心经营指标</div>
   <div class="g5">
-    <div class="kp"><div class="kp-l">3月总广告费用</div><div class="kp-v">¥2022.67万</div><div class="kp-s" style="color:#22c55e">目标完成率 112.4% ✓</div></div>
-    <div class="kp"><div class="kp-l">月度目标</div><div class="kp-v">¥1800万</div><div class="kp-s" style="color:#22c55e">超额 ¥222.67万</div></div>
+    <div class="kp"><div class="kp-l">3月总广告费用</div><div class="kp-v" id="ov-total">¥2022.67万</div><div class="kp-s" id="ov-rate-s" style="color:#22c55e">目标完成率 112.4% ✓</div></div>
+    <div class="kp"><div class="kp-l">月度目标</div><div class="kp-v">¥1800万</div><div class="kp-s" id="ov-exceed-s" style="color:#22c55e">超额 ¥222.67万</div></div>
     <div class="kp"><div class="kp-l">参与专员</div><div class="kp-v">4 人</div><div class="kp-s">84单 · 王晓源领跑</div></div>
-    <div class="kp"><div class="kp-l">老广告主</div><div class="kp-v">41 单</div><div class="kp-s" style="color:#22c55e">占比 48.8%</div></div>
-    <div class="kp"><div class="kp-l">新广告主</div><div class="kp-v">43 单</div><div class="kp-s" style="color:#818cf8">占比 51.2%</div></div>
+    <div class="kp"><div class="kp-l">老广告主</div><div class="kp-v" id="ov-old-cnt">41 单</div><div class="kp-s" id="ov-old-pct" style="color:#22c55e">占比 48.8%</div></div>
+    <div class="kp"><div class="kp-l">新广告主</div><div class="kp-v" id="ov-new-cnt">43 单</div><div class="kp-s" id="ov-new-pct" style="color:#818cf8">占比 51.2%</div></div>
   </div>
 
   <div class="sec">专员业绩概览</div>
@@ -152,25 +152,25 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div style="width:68px;height:68px;border-radius:50%;background:rgba(34,197,94,.15);border:2px solid rgba(34,197,94,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:28px">✓</div>
     <div style="flex:1">
       <div style="font-family:var(--mo);font-size:10px;color:var(--t3);letter-spacing:.08em;margin-bottom:6px">3月目标达成情况</div>
-      <div style="font-family:var(--mo);font-size:26px;font-weight:600;color:#22c55e;letter-spacing:-.02em;line-height:1">目标完成率 112.4%</div>
-      <div style="font-family:var(--mo);font-size:12px;color:var(--t2);margin-top:6px">月度目标 ¥1800万 · 实际完成 ¥2022.67万 · 超额 ¥222.67万</div>
+      <div style="font-family:var(--mo);font-size:26px;font-weight:600;color:#22c55e;letter-spacing:-.02em;line-height:1" id="tgt-rate-big">目标完成率 112.4%</div>
+      <div id="tgt-banner-sub" style="font-family:var(--mo);font-size:12px;color:var(--t2);margin-top:6px">月度目标 ¥1800万 · 实际完成 ¥2022.67万 · 超额 ¥222.67万</div>
     </div>
     <div style="text-align:right;flex-shrink:0">
       <div style="font-family:var(--mo);font-size:10px;color:var(--t3);margin-bottom:4px">超额完成</div>
-      <div style="font-family:var(--mo);font-size:30px;font-weight:600;color:#22c55e">+¥222.67万</div>
-      <div style="font-family:var(--mo);font-size:10px;color:var(--t3);margin-top:4px">超出目标 12.4%</div>
+      <div style="font-family:var(--mo);font-size:30px;font-weight:600;color:#22c55e" id="tgt-exceed-big">+¥222.67万</div>
+      <div id="tgt-exceed-pct" style="font-family:var(--mo);font-size:10px;color:var(--t3);margin-top:4px">超出目标 12.4%</div>
     </div>
   </div>
 
   <div class="g4" style="margin-bottom:10px">
     <div class="kp"><div class="kp-l">月度目标</div><div class="kp-v">¥1800万</div><div class="kp-s">本月设定</div></div>
-    <div class="kp"><div class="kp-l">实际完成</div><div class="kp-v" style="color:#22c55e">¥2022.67万</div><div class="kp-s" style="color:#22c55e">超额 ¥222.67万</div></div>
-    <div class="kp"><div class="kp-l">完成率</div><div class="kp-v" style="color:#22c55e">112.4%</div><div class="kp-s" style="color:#22c55e">已达标 ✓</div></div>
-    <div class="kp"><div class="kp-l">参与专员 / 成单</div><div class="kp-v">4人 / 84单</div><div class="kp-s">日均 ¥80.9万</div></div>
+    <div class="kp"><div class="kp-l">实际完成</div><div class="kp-v" id="tgt-total" style="color:#22c55e">¥2022.67万</div><div class="kp-s" id="tgt-exceed-s" style="color:#22c55e">超额 ¥222.67万</div></div>
+    <div class="kp"><div class="kp-l">完成率</div><div class="kp-v" id="tgt-rate" style="color:#22c55e">112.4%</div><div class="kp-s" style="color:#22c55e">已达标 ✓</div></div>
+    <div class="kp"><div class="kp-l">参与专员 / 成单</div><div class="kp-v" id="tgt-cnt">4人 / 84单</div><div class="kp-s">日均 ¥80.9万</div></div>
   </div>
 
   <div class="sec">专员目标达成</div>
-  <div class="g4" style="margin-bottom:10px"><div class="kp" style="border-top:2px solid #6366F1">
+  <div class="g4" style="margin-bottom:10px"><div class="kp" id="tgt-staff-wxy" style="border-top:2px solid #6366F1">
       <div class="kp-l" style="color:#6366F1">王晓源</div>
       <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:5px">
         <div style="font-family:var(--mo);font-size:20px;font-weight:600;color:#22c55e">112.4%</div>
@@ -179,7 +179,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       <div style="height:4px;background:var(--b0);border-radius:2px;overflow:hidden">
         <div style="height:100%;border-radius:2px;background:#6366F1;width:100%"></div>
       </div>
-    </div><div class="kp" style="border-top:2px solid #22d3ee">
+    </div><div class="kp" id="tgt-staff-lxy" style="border-top:2px solid #22d3ee">
       <div class="kp-l" style="color:#22d3ee">刘星宇</div>
       <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:5px">
         <div style="font-family:var(--mo);font-size:20px;font-weight:600;color:#22c55e">112.4%</div>
@@ -188,7 +188,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       <div style="height:4px;background:var(--b0);border-radius:2px;overflow:hidden">
         <div style="height:100%;border-radius:2px;background:#22d3ee;width:100%"></div>
       </div>
-    </div><div class="kp" style="border-top:2px solid #f59e0b">
+    </div><div class="kp" id="tgt-staff-cxj" style="border-top:2px solid #f59e0b">
       <div class="kp-l" style="color:#f59e0b">陈新吉</div>
       <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:5px">
         <div style="font-family:var(--mo);font-size:20px;font-weight:600;color:#22c55e">112.4%</div>
@@ -197,7 +197,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       <div style="height:4px;background:var(--b0);border-radius:2px;overflow:hidden">
         <div style="height:100%;border-radius:2px;background:#f59e0b;width:100%"></div>
       </div>
-    </div><div class="kp" style="border-top:2px solid #22c55e">
+    </div><div class="kp" id="tgt-staff-cmz" style="border-top:2px solid #22c55e">
       <div class="kp-l" style="color:#22c55e">崔明哲</div>
       <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:5px">
         <div style="font-family:var(--mo);font-size:20px;font-weight:600;color:#22c55e">112.4%</div>
@@ -1427,18 +1427,27 @@ function gv(k) { try{const v=localStorage.getItem(k);return v?JSON.parse(v):null
 function refreshAll() {
   // Destroy all charts
   Object.keys(CHS).forEach(k => { try { CHS[k].destroy(); delete CHS[k]; } catch(e){} });
-  // Hard-reset ALL tab flags (don't rely on Object.keys which may miss unvisited tabs)
-  inited['ov'] = false;
-  inited['target'] = false;
-  inited['staff'] = false;
-  inited['type'] = false;
-  inited['trend'] = false;
-  inited['detail'] = false;
-  inited['cpa'] = false;
-  // Find current tab and re-render it
+  // Force-reset ALL known tabs
+  ['ov','target','staff','type','trend','detail','cpa'].forEach(k => { inited[k] = false; });
+  // Re-render every data tab immediately (except cpa which is live)
   const cur = document.querySelector('.nb.on');
   const curN = cur ? (cur.getAttribute('onclick').match(/'(\w+)'/)||[])[1] : 'ov';
-  if (curN) go(curN);
+  // Re-render all tabs directly bypassing inited guard
+  try { initOv(); inited['ov'] = true; } catch(e){}
+  try { initTarget(); inited['target'] = true; } catch(e){}
+  try { initStaff(); inited['staff'] = true; } catch(e){}
+  try { initType(); inited['type'] = true; } catch(e){}
+  try { initTrend(); inited['trend'] = true; } catch(e){}
+  try { rebuildDetailTable(PAY||[]); inited['detail'] = true; } catch(e){}
+  // Make sure the current visible tab is shown
+  if (curN) {
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+    document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+    const pg = document.getElementById('p-'+curN);
+    if (pg) pg.classList.add('on');
+    const nb = document.querySelector('.nb[onclick*="\''+curN+'\'"]');
+    if (nb) nb.classList.add('on');
+  }
 }
 
 const CHS={};
@@ -1490,7 +1499,7 @@ function initOv(){
     {responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#94a3b8',font:{size:10,family:'JetBrains Mono'},boxWidth:9,padding:9}},tooltip:{...TIP,callbacks:{label:c=>` ${c.label}: ¥${c.parsed.toFixed(2)}万`}}}});
   mk('c-top-adv','bar',{labels:top_adv.map(a=>a[0].slice(0,8)),datasets:[{label:'费用(万)',data:top_adv.map(a=>a[1]),backgroundColor:'rgba(34,197,94,.7)',borderRadius:3,borderSkipped:false}]},
     {responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TIP,callbacks:{label:c=>` ¥${c.parsed.x.toFixed(2)}万`}}},scales:{x:xAx({callback:v=>'¥'+v+'万'}),y:{...yAx(),grid:{display:false}}}});
-  mk('c-newold','doughnut',{labels:['老广告主(41单)','新广告主(43单)','未标注(0单)'],datasets:[{data:[41,43,0],backgroundColor:['rgba(34,197,94,.7)','rgba(99,102,241,.7)','rgba(100,100,120,.5)'],borderColor:['#22c55e','#6366F1','#4a5275'],borderWidth:1.5,hoverOffset:6}]},
+  mk('c-newold','doughnut',{labels:['老广告主('+SALES_DATA.old_cnt+'单)','新广告主('+SALES_DATA.new_cnt+'单)','未标注(0单)'],datasets:[{data:[SALES_DATA.old_cnt,SALES_DATA.new_cnt,0],backgroundColor:['rgba(34,197,94,.7)','rgba(99,102,241,.7)','rgba(100,100,120,.5)'],borderColor:['#22c55e','#6366F1','#4a5275'],borderWidth:1.5,hoverOffset:6}]},
     {responsive:true,maintainAspectRatio:false,cutout:'50%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#94a3b8',font:{size:10,family:'JetBrains Mono'},boxWidth:9,padding:9}},tooltip:{...TIP}}});
 }
 
@@ -1799,6 +1808,51 @@ function rebuildSalesData(records) {
     if (valEl)  valEl.textContent  = '¥' + SALES_DATA.staff_total[s].toFixed(2) + '万';
     if (metaEl) metaEl.textContent = SALES_DATA.staff_cnt[s] + '单 · 占比' + (SALES_DATA.staff_total[s]/total*100).toFixed(1) + '%';
     if (barEl)  barEl.style.width  = (SALES_DATA.staff_total[s]/total*100).toFixed(1) + '%';
+  });
+
+  // ── 更新所有硬编码的静态数字 ──
+  const target2 = 1800;
+  const rate2 = +(total/target2*100).toFixed(1);
+  const exceed2 = +(total-target2).toFixed(2);
+  const exRate2 = +(exceed2/target2*100).toFixed(1);
+  const isOver = total >= target2;
+  const s = id => document.getElementById(id);
+
+  // 总览页
+  if(s('ov-total')) s('ov-total').textContent = '¥'+total.toFixed(2)+'万';
+  if(s('ov-rate-s')) s('ov-rate-s').textContent = '目标完成率 '+rate2+'% '+(isOver?'✓':'');
+  if(s('ov-exceed-s')) s('ov-exceed-s').textContent = (isOver?'超额 ¥':'差 ¥')+Math.abs(exceed2).toFixed(2)+'万';
+  if(s('ov-old-cnt')) s('ov-old-cnt').textContent = SALES_DATA.old_cnt+' 单';
+  if(s('ov-new-cnt')) s('ov-new-cnt').textContent = SALES_DATA.new_cnt+' 单';
+  if(s('ov-old-pct')) s('ov-old-pct').textContent = '占比 '+(SALES_DATA.old_cnt/SALES_DATA.cnt*100).toFixed(1)+'%';
+  if(s('ov-new-pct')) s('ov-new-pct').textContent = '占比 '+(SALES_DATA.new_cnt/SALES_DATA.cnt*100).toFixed(1)+'%';
+
+  // 目标达成页 banner
+  if(s('tgt-rate-big')) s('tgt-rate-big').textContent = '目标完成率 '+rate2+'%';
+  if(s('tgt-banner-sub')) s('tgt-banner-sub').textContent = '月度目标 ¥'+target2+'万 · 实际完成 ¥'+total.toFixed(2)+'万 · '+(isOver?'超额':'差')+'¥'+Math.abs(exceed2).toFixed(2)+'万';
+  if(s('tgt-exceed-big')) s('tgt-exceed-big').textContent = (isOver?'+':'−')+'¥'+Math.abs(exceed2).toFixed(2)+'万';
+  if(s('tgt-exceed-pct')) s('tgt-exceed-pct').textContent = (isOver?'超出':'差距')+'目标 '+Math.abs(exRate2).toFixed(1)+'%';
+
+  // 目标达成页 KPI卡片
+  if(s('tgt-total')) s('tgt-total').textContent = '¥'+total.toFixed(2)+'万';
+  if(s('tgt-exceed-s')) s('tgt-exceed-s').textContent = (isOver?'超额 ¥':'差 ¥')+Math.abs(exceed2).toFixed(2)+'万';
+  if(s('tgt-rate')) s('tgt-rate').textContent = rate2+'%';
+  if(s('tgt-cnt')) s('tgt-cnt').textContent = staffKeys.length+'人 / '+SALES_DATA.cnt+'单';
+
+  // 目标达成页 专员卡片
+  const slugMap = {'王晓源':'wxy','刘星宇':'lxy','陈新吉':'cxj','崔明哲':'cmz'};
+  staffKeys.forEach(st => {
+    const slug = slugMap[st];
+    if (!slug) return;
+    const card = document.getElementById('tgt-staff-'+slug);
+    if (!card) return;
+    const stTotal = SALES_DATA.staff_total[st]||0;
+    const stTarget = +(stTotal/total*target2).toFixed(2);
+    const stRate = +(stTotal/stTarget*100).toFixed(1);
+    const rateEl = card.querySelector('[style*="font-size:20px"]');
+    const detailEl = card.querySelector('[style*="font-size:10px"][style*="color:var(--t3)"]');
+    if (rateEl) rateEl.textContent = stRate+'%';
+    if (detailEl) detailEl.textContent = '实际 ¥'+stTotal.toFixed(2)+' / 目标 ¥'+stTarget.toFixed(2);
   });
 }
 
