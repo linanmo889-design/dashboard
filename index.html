@@ -96,7 +96,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   <div class="sec" id="sec-ov">3月核心经营指标</div>
   <div class="g5">
     <div class="kp"><div class="kp-l" id="kp-total-label">3月总广告费用</div><div class="kp-v" id="ov-total">¥2022.67万</div><div class="kp-s" id="ov-rate-s" style="color:#22c55e">目标完成率 112.4% ✓</div></div>
-    <div class="kp"><div class="kp-l">月度目标</div><div class="kp-v">¥1800万</div><div class="kp-s" id="ov-exceed-s" style="color:#22c55e">超额 ¥222.67万</div></div>
+    <div class="kp"><div class="kp-l">月度目标</div><div class="kp-v" id="ov-target">¥1800万</div><div class="kp-s" id="ov-exceed-s" style="color:#22c55e">超额 ¥222.67万</div></div>
     <div class="kp"><div class="kp-l">参与专员</div><div class="kp-v" id="ov-staff-cnt">4 人</div><div class="kp-s" id="ov-staff-meta">84单 · 王晓源领跑</div></div>
     <div class="kp"><div class="kp-l">老广告主</div><div class="kp-v" id="ov-old-cnt">41 单</div><div class="kp-s" id="ov-old-pct" style="color:#22c55e">占比 48.8%</div></div>
     <div class="kp"><div class="kp-l">新广告主</div><div class="kp-v" id="ov-new-cnt">43 单</div><div class="kp-s" id="ov-new-pct" style="color:#818cf8">占比 51.2%</div></div>
@@ -148,7 +148,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   </div>
 
   <div class="g4" style="margin-bottom:10px">
-    <div class="kp"><div class="kp-l">月度目标</div><div class="kp-v">¥1800万</div><div class="kp-s">本月设定</div></div>
+    <div class="kp"><div class="kp-l">月度目标</div><div class="kp-v" id="tgt-target">¥1800万</div><div class="kp-s">本月设定</div></div>
     <div class="kp"><div class="kp-l">实际完成</div><div class="kp-v" id="tgt-total" style="color:#22c55e">¥2022.67万</div><div class="kp-s" id="tgt-exceed-s" style="color:#22c55e">超额 ¥222.67万</div></div>
     <div class="kp"><div class="kp-l">完成率</div><div class="kp-v" id="tgt-rate" style="color:#22c55e">112.4%</div><div class="kp-s" style="color:#22c55e">已达标 ✓</div></div>
     <div class="kp"><div class="kp-l">参与专员 / 成单</div><div class="kp-v" id="tgt-cnt">4人 / 84单</div><div class="kp-s">日均 ¥80.9万</div></div>
@@ -1382,8 +1382,8 @@ function switchMonth(m) {
       if (records && records.length) {
         PAY = records;
         rebuildSalesData(records);
-        refreshAll();
         document.querySelectorAll('.no-data-overlay').forEach(el => el.remove());
+        refreshAll();
         const t = records.reduce((s,r)=>s+r.amount,0);
         if (statusEl) statusEl.textContent = '✓ 已加载 '+records.length+' 条（'+lbl+'），合计 ¥'+t.toFixed(2)+'万';
         return;
@@ -1391,25 +1391,15 @@ function switchMonth(m) {
     } catch(e) {}
   }
   PAY = [];
-  if (statusEl) statusEl.textContent = lbl+'暂无销售数据，请上传 CSV';
-  // 清空所有图表和数据显示
+  if (statusEl) statusEl.textContent = lbl+'暂无销售数据，请前往 CPA投放页上传 CSV';
+  // 不显示遮罩，只重置inited让用户上传后能正确刷新
   Object.keys(CHS).forEach(k => { try { CHS[k].destroy(); delete CHS[k]; } catch(e){} });
-  ['ov','target','staff','type','trend','detail'].forEach(k => { inited[k] = false; });
-  // 在各数据页显示"暂无数据"提示
-  ['p-ov','p-target','p-staff','p-type','p-trend','p-detail'].forEach(pid => {
-    const pg = document.getElementById(pid);
-    if (!pg) return;
-    // 移除旧提示
-    const old = pg.querySelector('.no-data-overlay');
-    if (old) old.remove();
-    // 加新提示
-    const div = document.createElement('div');
-    div.className = 'no-data-overlay';
-    div.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(8,8,14,.85);z-index:10;border-radius:12px;gap:12px';
-    div.innerHTML = '<div style="font-size:32px">📭</div><div style="font-family:var(--mo);font-size:14px;color:var(--t2)">'+lbl+'暂无数据</div><div style="font-family:var(--mo);font-size:11px;color:var(--t3)">请前往 CPA投放页上传 '+lbl+' CSV</div>';
-    pg.style.position = 'relative';
-    pg.appendChild(div);
-  });
+  inited['ov'] = false;
+  inited['target'] = false;
+  inited['staff'] = false;
+  inited['type'] = false;
+  inited['trend'] = false;
+  inited['detail'] = false;
 }
 const TIP={backgroundColor:'#111220',borderColor:'#1c1e32',borderWidth:1,titleColor:'#94a3b8',bodyColor:'#e2e8f0',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},padding:10,boxWidth:8,boxHeight:8};
 function numVal(v) { if(!v&&v!==0) return 0; return parseFloat(String(v).replace(/[,，¥￥\s]/g,''))||0; }
@@ -1418,29 +1408,20 @@ let PAY = [];
 function sv(k,v) { try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
 function gv(k) { try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;} }
 function refreshAll() {
-  // Destroy all charts
+  // 销毁所有图表
   Object.keys(CHS).forEach(k => { try { CHS[k].destroy(); delete CHS[k]; } catch(e){} });
-  // Force-reset ALL known tabs
-  ['ov','target','staff','type','trend','detail','cpa'].forEach(k => { inited[k] = false; });
-  // Re-render every data tab immediately (except cpa which is live)
+  // 强制重置所有页签标志
+  inited['ov'] = false;
+  inited['target'] = false;
+  inited['staff'] = false;
+  inited['type'] = false;
+  inited['trend'] = false;
+  inited['detail'] = false;
+  inited['cpa'] = false;
+  // 只重渲当前可见页签
   const cur = document.querySelector('.nb.on');
   const curN = cur ? (cur.getAttribute('onclick').match(/'(\w+)'/)||[])[1] : 'ov';
-  // Re-render all tabs directly bypassing inited guard
-  try { initOv(); inited['ov'] = true; } catch(e){}
-  try { initTarget(); inited['target'] = true; } catch(e){}
-  try { initStaff(); inited['staff'] = true; } catch(e){}
-  try { initType(); inited['type'] = true; } catch(e){}
-  try { initTrend(); inited['trend'] = true; } catch(e){}
-  try { rebuildDetailTable(PAY||[]); inited['detail'] = true; } catch(e){}
-  // Make sure the current visible tab is shown
-  if (curN) {
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-    document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
-    const pg = document.getElementById('p-'+curN);
-    if (pg) pg.classList.add('on');
-    const nb = document.querySelector('.nb[onclick*="\''+curN+'\'"]');
-    if (nb) nb.classList.add('on');
-  }
+  if (curN) go(curN);
 }
 
 const CHS={};
@@ -1757,6 +1738,9 @@ function rebuildSalesData(records) {
   SALES_DATA.top_adv     = newTopAdv;
   SALES_DATA.total       = +records.reduce((s,r) => s+r.amount, 0).toFixed(4);
   SALES_DATA.cnt         = records.length;
+  // 从records动态计算新老广告主（有newOld字段时用，没有时归零）
+  SALES_DATA.new_cnt = records.filter(r => (r.newOld||'').includes('新')).length;
+  SALES_DATA.old_cnt = records.filter(r => (r.newOld||'') && !(r.newOld||'').includes('新')).length;
 
   // Update proxy vars
   staff_total = SALES_DATA.staff_total;
@@ -1783,6 +1767,7 @@ function rebuildSalesData(records) {
   const cnt = SALES_DATA.cnt;
 
   const setTxt = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = val; };
+  const getEl = id => document.getElementById(id);
   // Overview KPIs
   const ovKpis = document.querySelectorAll('#p-ov .kp-v');
   if (ovKpis[0]) ovKpis[0].textContent = '¥' + total.toFixed(2) + '万';
@@ -1819,10 +1804,10 @@ function rebuildSalesData(records) {
   const exceed2 = +(total-target2).toFixed(2);
   const exRate2 = +(exceed2/target2*100).toFixed(1);
   const isOver = total >= target2;
-  const getEl = id => document.getElementById(id);
 
   // 总览页
   if(getEl('ov-total')) getEl('ov-total').textContent = '¥'+total.toFixed(2)+'万';
+  if(getEl('ov-target')) getEl('ov-target').textContent = '¥'+target2+'万';
   if(getEl('ov-rate-s')) getEl('ov-rate-s').textContent = '目标完成率 '+rate2+'% '+(isOver?'✓':'');
   if(getEl('ov-exceed-s')) getEl('ov-exceed-s').textContent = (isOver?'超额 ¥':'差 ¥')+Math.abs(exceed2).toFixed(2)+'万';
   if(getEl('ov-old-cnt')) getEl('ov-old-cnt').textContent = SALES_DATA.old_cnt+' 单';
@@ -1837,6 +1822,7 @@ function rebuildSalesData(records) {
   if(getEl('tgt-exceed-pct')) getEl('tgt-exceed-pct').textContent = (isOver?'超出':'差距')+'目标 '+Math.abs(exRate2).toFixed(1)+'%';
 
   // 目标达成页 KPI卡片
+  if(getEl('tgt-target')) getEl('tgt-target').textContent = '¥'+target2+'万';
   if(getEl('tgt-total')) getEl('tgt-total').textContent = '¥'+total.toFixed(2)+'万';
   if(getEl('tgt-exceed-s')) getEl('tgt-exceed-s').textContent = (isOver?'超额 ¥':'差 ¥')+Math.abs(exceed2).toFixed(2)+'万';
   if(getEl('tgt-rate')) getEl('tgt-rate').textContent = rate2+'%';
