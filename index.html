@@ -1398,8 +1398,10 @@ const GC='rgba(255,255,255,0.04)',TC='#4a5275';
 
 // ══ 月份管理 ══
 let currentMonth = 'mar';
-const MONTH_LABELS = {mar:'3月', apr:'4月'};
-const MONTH_KEYS   = {mar:'pay_records_mar', apr:'pay_records_apr'};
+const MONTH_LABELS   = {mar:'3月', apr:'4月'};
+const MONTH_KEYS     = {mar:'pay_records_mar', apr:'pay_records_apr'};
+const MONTH_TARGETS  = {mar:1800, apr:2100};   // 万元
+const MONTH_UNIT_DIV = {mar:1, apr:10000};     // 4月CSV单位是元，需除以10000转万
 
 function switchMonth(m) {
   if (currentMonth === m) return;
@@ -1553,7 +1555,7 @@ function initOv(){
 
 function initTarget(){
   const total = Object.values(staff_total).reduce((s,v)=>s+v,0);
-  const target = 1800;
+  const target = MONTH_TARGETS[currentMonth];
   const rate = +(total/target*100).toFixed(1);
   const exceed = +(total-target).toFixed(2);
   const exRate = +(exceed/target*100).toFixed(1);
@@ -1689,7 +1691,7 @@ function handlePayCsv(file) {
     for (let i = hdrIdx + 1; i < rawRows.length; i++) {
       const row = rawRows[i];
       if (!row[0] || !/^\d+$/.test(row[0].trim())) continue;
-      const amt = numVal(row[amtIdx] || '');
+      const amt = numVal(row[amtIdx] || '') / MONTH_UNIT_DIV[currentMonth];
       if (!amt) continue;
       let staff = staffIdx >= 0 ? row[staffIdx] : '';
       if (staff === '康泽') staff = '刘星宇';
@@ -1831,7 +1833,7 @@ function rebuildSalesData(records) {
 
   // Update static KPI cards in overview
   const total = SALES_DATA.total;
-  const target = 1800;
+  const target = MONTH_TARGETS[currentMonth];
   const rate = (total/target*100).toFixed(1);
   const exceed = (total - target).toFixed(2);
   const cnt = SALES_DATA.cnt;
@@ -1862,7 +1864,7 @@ function rebuildSalesData(records) {
   });
 
   // ── 更新所有硬编码的静态数字 ──
-  const target2 = 1800;
+  const target2 = MONTH_TARGETS[currentMonth];
   const rate2 = +(total/target2*100).toFixed(1);
   const exceed2 = +(total-target2).toFixed(2);
   const exRate2 = +(exceed2/target2*100).toFixed(1);
