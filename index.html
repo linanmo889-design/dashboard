@@ -1427,27 +1427,18 @@ function gv(k) { try{const v=localStorage.getItem(k);return v?JSON.parse(v):null
 function refreshAll() {
   // Destroy all charts
   Object.keys(CHS).forEach(k => { try { CHS[k].destroy(); delete CHS[k]; } catch(e){} });
-  // Force-reset ALL known tabs
-  ['ov','target','staff','type','trend','detail','cpa'].forEach(k => { inited[k] = false; });
-  // Re-render every data tab immediately (except cpa which is live)
+  // Hard-reset ALL tab flags (don't rely on Object.keys which may miss unvisited tabs)
+  inited['ov'] = false;
+  inited['target'] = false;
+  inited['staff'] = false;
+  inited['type'] = false;
+  inited['trend'] = false;
+  inited['detail'] = false;
+  inited['cpa'] = false;
+  // Find current tab and re-render it
   const cur = document.querySelector('.nb.on');
   const curN = cur ? (cur.getAttribute('onclick').match(/'(\w+)'/)||[])[1] : 'ov';
-  // Re-render all tabs directly bypassing inited guard
-  try { initOv(); inited['ov'] = true; } catch(e){}
-  try { initTarget(); inited['target'] = true; } catch(e){}
-  try { initStaff(); inited['staff'] = true; } catch(e){}
-  try { initType(); inited['type'] = true; } catch(e){}
-  try { initTrend(); inited['trend'] = true; } catch(e){}
-  try { rebuildDetailTable(PAY||[]); inited['detail'] = true; } catch(e){}
-  // Make sure the current visible tab is shown
-  if (curN) {
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-    document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
-    const pg = document.getElementById('p-'+curN);
-    if (pg) pg.classList.add('on');
-    const nb = document.querySelector('.nb[onclick*="\''+curN+'\'"]');
-    if (nb) nb.classList.add('on');
-  }
+  if (curN) go(curN);
 }
 
 const CHS={};
