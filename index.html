@@ -1437,6 +1437,7 @@ function switchMonth(m) {
         PAY = records;
         rebuildSalesData(records);
         refreshAll();
+        document.querySelectorAll('.no-data-overlay').forEach(el => el.remove());
         const t = records.reduce((s,r)=>s+r.amount,0);
         if (statusEl) statusEl.textContent = '✓ 已加载 '+records.length+' 条（'+lbl+'），合计 ¥'+t.toFixed(2)+'万';
         return;
@@ -1445,8 +1446,24 @@ function switchMonth(m) {
   }
   PAY = [];
   if (statusEl) statusEl.textContent = lbl+'暂无销售数据，请上传 CSV';
-  rebuildSalesData([]);
-  refreshAll();
+  // 清空所有图表和数据显示
+  Object.keys(CHS).forEach(k => { try { CHS[k].destroy(); delete CHS[k]; } catch(e){} });
+  ['ov','target','staff','type','trend','detail'].forEach(k => { inited[k] = false; });
+  // 在各数据页显示"暂无数据"提示
+  ['p-ov','p-target','p-staff','p-type','p-trend','p-detail'].forEach(pid => {
+    const pg = document.getElementById(pid);
+    if (!pg) return;
+    // 移除旧提示
+    const old = pg.querySelector('.no-data-overlay');
+    if (old) old.remove();
+    // 加新提示
+    const div = document.createElement('div');
+    div.className = 'no-data-overlay';
+    div.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(8,8,14,.85);z-index:10;border-radius:12px;gap:12px';
+    div.innerHTML = '<div style="font-size:32px">📭</div><div style="font-family:var(--mo);font-size:14px;color:var(--t2)">'+lbl+'暂无数据</div><div style="font-family:var(--mo);font-size:11px;color:var(--t3)">请前往 CPA投放页上传 '+lbl+' CSV</div>';
+    pg.style.position = 'relative';
+    pg.appendChild(div);
+  });
 }
 const TIP={backgroundColor:'#111220',borderColor:'#1c1e32',borderWidth:1,titleColor:'#94a3b8',bodyColor:'#e2e8f0',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},padding:10,boxWidth:8,boxHeight:8};
 function numVal(v) { if(!v&&v!==0) return 0; return parseFloat(String(v).replace(/[,，¥￥\s]/g,''))||0; }
@@ -1700,6 +1717,8 @@ function handlePayCsv(file) {
     const statusEl = document.getElementById('pay-csv-status');
     const total = records.reduce((s,r) => s+r.amount, 0);
     if (statusEl) statusEl.textContent = '✓ 已导入 ' + records.length + ' 条（'+MONTH_LABELS[currentMonth]+'），合计 ¥' + total.toFixed(2) + '万，图表已更新';
+    // 移除暂无数据提示
+    document.querySelectorAll('.no-data-overlay').forEach(el => el.remove());
     refreshAll();
   };
   reader.readAsText(file, 'utf-8');
