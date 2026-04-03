@@ -1810,8 +1810,8 @@ function rebuildSalesData(records) {
     }).join('');
   }
   // 参与专员KPI
-  if(getEl('ov-staff-cnt')) s('ov-staff-cnt').textContent = staffKeys.length + ' 人';
-  if(getEl('ov-staff-meta')) s('ov-staff-meta').textContent = SALES_DATA.cnt + '单 · ' + (staffKeys[0]||'') + '领跑';
+  if(getEl('ov-staff-cnt')) getEl('ov-staff-cnt').textContent = staffKeys.length + ' 人';
+  if(getEl('ov-staff-meta')) getEl('ov-staff-meta').textContent = SALES_DATA.cnt + '单 · ' + (staffKeys[0]||'') + '领跑';
 
   // ── 更新所有硬编码的静态数字 ──
   const target2 = MONTH_TARGETS[currentMonth];
@@ -1822,25 +1822,25 @@ function rebuildSalesData(records) {
   const getEl = id => document.getElementById(id);
 
   // 总览页
-  if(getEl('ov-total')) s('ov-total').textContent = '¥'+total.toFixed(2)+'万';
-  if(getEl('ov-rate-s')) s('ov-rate-s').textContent = '目标完成率 '+rate2+'% '+(isOver?'✓':'');
-  if(getEl('ov-exceed-s')) s('ov-exceed-s').textContent = (isOver?'超额 ¥':'差 ¥')+Math.abs(exceed2).toFixed(2)+'万';
-  if(getEl('ov-old-cnt')) s('ov-old-cnt').textContent = SALES_DATA.old_cnt+' 单';
-  if(getEl('ov-new-cnt')) s('ov-new-cnt').textContent = SALES_DATA.new_cnt+' 单';
-  if(getEl('ov-old-pct')) s('ov-old-pct').textContent = '占比 '+(SALES_DATA.old_cnt/SALES_DATA.cnt*100).toFixed(1)+'%';
-  if(getEl('ov-new-pct')) s('ov-new-pct').textContent = '占比 '+(SALES_DATA.new_cnt/SALES_DATA.cnt*100).toFixed(1)+'%';
+  if(getEl('ov-total')) getEl('ov-total').textContent = '¥'+total.toFixed(2)+'万';
+  if(getEl('ov-rate-s')) getEl('ov-rate-s').textContent = '目标完成率 '+rate2+'% '+(isOver?'✓':'');
+  if(getEl('ov-exceed-s')) getEl('ov-exceed-s').textContent = (isOver?'超额 ¥':'差 ¥')+Math.abs(exceed2).toFixed(2)+'万';
+  if(getEl('ov-old-cnt')) getEl('ov-old-cnt').textContent = SALES_DATA.old_cnt+' 单';
+  if(getEl('ov-new-cnt')) getEl('ov-new-cnt').textContent = SALES_DATA.new_cnt+' 单';
+  if(getEl('ov-old-pct')) getEl('ov-old-pct').textContent = '占比 '+(SALES_DATA.old_cnt/SALES_DATA.cnt*100).toFixed(1)+'%';
+  if(getEl('ov-new-pct')) getEl('ov-new-pct').textContent = '占比 '+(SALES_DATA.new_cnt/SALES_DATA.cnt*100).toFixed(1)+'%';
 
   // 目标达成页 banner
-  if(getEl('tgt-rate-big')) s('tgt-rate-big').textContent = '目标完成率 '+rate2+'%';
-  if(getEl('tgt-banner-sub')) s('tgt-banner-sub').textContent = '月度目标 ¥'+target2+'万 · 实际完成 ¥'+total.toFixed(2)+'万 · '+(isOver?'超额':'差')+'¥'+Math.abs(exceed2).toFixed(2)+'万';
-  if(getEl('tgt-exceed-big')) s('tgt-exceed-big').textContent = (isOver?'+':'−')+'¥'+Math.abs(exceed2).toFixed(2)+'万';
-  if(getEl('tgt-exceed-pct')) s('tgt-exceed-pct').textContent = (isOver?'超出':'差距')+'目标 '+Math.abs(exRate2).toFixed(1)+'%';
+  if(getEl('tgt-rate-big')) getEl('tgt-rate-big').textContent = '目标完成率 '+rate2+'%';
+  if(getEl('tgt-banner-sub')) getEl('tgt-banner-sub').textContent = '月度目标 ¥'+target2+'万 · 实际完成 ¥'+total.toFixed(2)+'万 · '+(isOver?'超额':'差')+'¥'+Math.abs(exceed2).toFixed(2)+'万';
+  if(getEl('tgt-exceed-big')) getEl('tgt-exceed-big').textContent = (isOver?'+':'−')+'¥'+Math.abs(exceed2).toFixed(2)+'万';
+  if(getEl('tgt-exceed-pct')) getEl('tgt-exceed-pct').textContent = (isOver?'超出':'差距')+'目标 '+Math.abs(exRate2).toFixed(1)+'%';
 
   // 目标达成页 KPI卡片
-  if(getEl('tgt-total')) s('tgt-total').textContent = '¥'+total.toFixed(2)+'万';
-  if(getEl('tgt-exceed-s')) s('tgt-exceed-s').textContent = (isOver?'超额 ¥':'差 ¥')+Math.abs(exceed2).toFixed(2)+'万';
-  if(getEl('tgt-rate')) s('tgt-rate').textContent = rate2+'%';
-  if(getEl('tgt-cnt')) s('tgt-cnt').textContent = staffKeys.length+'人 / '+SALES_DATA.cnt+'单';
+  if(getEl('tgt-total')) getEl('tgt-total').textContent = '¥'+total.toFixed(2)+'万';
+  if(getEl('tgt-exceed-s')) getEl('tgt-exceed-s').textContent = (isOver?'超额 ¥':'差 ¥')+Math.abs(exceed2).toFixed(2)+'万';
+  if(getEl('tgt-rate')) getEl('tgt-rate').textContent = rate2+'%';
+  if(getEl('tgt-cnt')) getEl('tgt-cnt').textContent = staffKeys.length+'人 / '+SALES_DATA.cnt+'单';
 
   // 目标达成页 专员卡片 — 动态生成
   const tgtStaffContainer = document.getElementById('tgt-staff-cards');
@@ -1883,9 +1883,9 @@ function rebuildSalesData(records) {
       return `<tr><td style="color:${c};font-weight:500">${st}</td><td>${stC}</td><td style="color:var(--gn);font-weight:600">${stT.toFixed(4)}</td><td>${stAvg}</td>${typeVals}</tr>`;
     }).join('');
   }
-  if(getEl('ssum-cnt')) s('ssum-cnt').textContent = SALES_DATA.cnt;
-  if(getEl('ssum-total')) s('ssum-total').textContent = SALES_DATA.total.toFixed(4);
-  if(getEl('ssum-avg')) s('ssum-avg').textContent = SALES_DATA.cnt ? (SALES_DATA.total/SALES_DATA.cnt).toFixed(4) : '—';
+  if(getEl('ssum-cnt')) getEl('ssum-cnt').textContent = SALES_DATA.cnt;
+  if(getEl('ssum-total')) getEl('ssum-total').textContent = SALES_DATA.total.toFixed(4);
+  if(getEl('ssum-avg')) getEl('ssum-avg').textContent = SALES_DATA.cnt ? (SALES_DATA.total/SALES_DATA.cnt).toFixed(4) : '—';
   AD_TYPES_LIST2.forEach((t, i) => { const el=getEl('ssum-t'+i); if(el) el.textContent=(SALES_DATA.type_total[t]||0).toFixed(4); });
 
   // ── 广告类型页 KPI 卡片 ──
