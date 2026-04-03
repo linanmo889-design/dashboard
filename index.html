@@ -288,46 +288,18 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   <div class="cc mb"><div class="tbl-wrap"><table class="tbl">
     <thead><tr><th class="la">专员</th><th>成单数</th><th>总收入(万)</th><th>平均单价(万)</th>
     <th>棋牌</th><th>炮台</th><th>播放器</th><th>直播</th><th>天马</th><th>游戏</th><th>春药</th></tr></thead>
-    <tbody><tr>
-      <td style="color:#6366F1;font-weight:500">王晓源</td>
-      <td>25</td>
-      <td style="color:var(--gn);font-weight:600">974.2970</td>
-      <td>38.9719</td>
-      <td>830.0</td><td>3.0</td><td>101.007</td><td>30.29</td><td>10.0</td><td>—</td><td>—</td>
-    </tr><tr>
-      <td style="color:#22d3ee;font-weight:500">刘星宇</td>
-      <td>21</td>
-      <td style="color:var(--gn);font-weight:600">679.7479</td>
-      <td>32.3689</td>
-      <td>—</td><td>516.3903</td><td>62.5</td><td>—</td><td>30.0</td><td>35.8576</td><td>35.0</td>
-    </tr><tr>
-      <td style="color:#f59e0b;font-weight:500">陈新吉</td>
-      <td>21</td>
-      <td style="color:var(--gn);font-weight:600">213.6250</td>
-      <td>10.1726</td>
-      <td>—</td><td>61.5</td><td>73.0</td><td>54.9</td><td>24.225</td><td>—</td><td>—</td>
-    </tr><tr>
-      <td style="color:#22c55e;font-weight:500">崔明哲</td>
-      <td>17</td>
-      <td style="color:var(--gn);font-weight:600">155.0000</td>
-      <td>9.1176</td>
-      <td>—</td><td>—</td><td>155.0</td><td>—</td><td>—</td><td>—</td><td>—</td>
-    </tr></tbody>
-    <tr class="sr"><td>合计</td><td>84</td><td style="color:var(--gn)">2022.6698</td>
-    <td>24.0794</td>
-    <td>830.0</td><td>580.8903</td><td>391.507</td><td>85.19</td><td>64.225</td><td>35.8576</td><td>35.0</td></tr>
+    <tbody id="staff-summary-body"></tbody>
+    <tr class="sr" id="staff-summary-foot"><td>合计</td><td id="ssum-cnt">84</td><td style="color:var(--gn)" id="ssum-total">2022.6698</td>
+    <td id="ssum-avg">24.0794</td>
+    <td id="ssum-t0">830.0</td><td id="ssum-t1">580.8903</td><td id="ssum-t2">391.507</td><td id="ssum-t3">85.19</td><td id="ssum-t4">64.225</td><td id="ssum-t5">35.8576</td><td id="ssum-t6">35.0</td></tr>
   </table></div></div>
 </div>
 
 <!-- 广告类型 -->
 <div class="page" id="p-type">
   <div class="sec">广告类型分析</div>
-  <div class="g4">
-    <div class="kp"><div class="kp-l">棋牌</div><div class="kp-v">¥830.00万</div><div class="kp-s">占比 41.0%</div></div><div class="kp"><div class="kp-l">炮台</div><div class="kp-v">¥580.89万</div><div class="kp-s">占比 28.7%</div></div><div class="kp"><div class="kp-l">播放器</div><div class="kp-v">¥391.51万</div><div class="kp-s">占比 19.4%</div></div><div class="kp"><div class="kp-l">直播</div><div class="kp-v">¥85.19万</div><div class="kp-s">占比 4.2%</div></div>
-  </div>
-  <div class="g3">
-    <div class="kp"><div class="kp-l">天马</div><div class="kp-v">¥64.22万</div><div class="kp-s">占比 3.2%</div></div><div class="kp"><div class="kp-l">游戏</div><div class="kp-v">¥35.86万</div><div class="kp-s">占比 1.8%</div></div><div class="kp"><div class="kp-l">春药</div><div class="kp-v">¥35.00万</div><div class="kp-s">占比 1.7%</div></div>
-  </div>
+  <div class="g4" id="type-kpi-row1"></div>
+  <div class="g3" id="type-kpi-row2"></div>
   <div class="g2">
     <div class="cc">
       <div class="cc-hd"><div class="ct"><div class="ctd" style="background:var(--am)"></div>广告类型收入排行</div></div>
@@ -1322,7 +1294,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
           <td><span style="background:rgba(34,197,94,.13);color:#22c55e;font-size:9px;padding:1px 6px;border-radius:3px;font-family:monospace">老</span></td>
         </tr>
       </tbody>
-      <tfoot><tr class="sr"><td colspan="2">合计（84条）</td><td></td><td></td><td></td><td></td><td></td><td>¥2022.6698万</td><td></td></tr></tfoot>
+      <tfoot><tr class="sr"><td colspan="2" id="detail-foot-cnt">合计（84条）</td><td></td><td></td><td></td><td></td><td></td><td id="detail-foot-total">¥2022.6698万</td><td></td></tr></tfoot>
     </table></div>
   </div>
 </div>
@@ -1584,8 +1556,10 @@ function filterTbl(){
     tr.style.display=show?'':'none';
     if(show){total+=fee;cnt++;}
   });
-  document.querySelector('#p-detail tfoot td:nth-child(2)').textContent=`合计（${cnt}条）`;
-  document.querySelector('#p-detail tfoot td:nth-child(8)').textContent=`¥${total.toFixed(4)}万`;
+  const cntEl = document.getElementById('detail-foot-cnt');
+  const totEl = document.getElementById('detail-foot-total');
+  if (cntEl) cntEl.textContent = `合计（${cnt}条）`;
+  if (totEl) totEl.textContent = `¥${total.toFixed(4)}万`;
 }
 
 const inited={};
@@ -1854,6 +1828,41 @@ function rebuildSalesData(records) {
     if (rateEl) rateEl.textContent = stRate+'%';
     if (detailEl) detailEl.textContent = '实际 ¥'+stTotal.toFixed(2)+' / 目标 ¥'+stTarget.toFixed(2);
   });
+
+  // ── 专员汇总表格 ──
+  const AD_TYPES_LIST2 = ['棋牌','炮台','播放器','直播','天马','游戏','春药'];
+  const STAFF_COLORS2 = {'王晓源':'#6366F1','刘星宇':'#22d3ee','陈新吉':'#f59e0b','崔明哲':'#22c55e'};
+  const staffBody = document.getElementById('staff-summary-body');
+  if (staffBody) {
+    staffBody.innerHTML = staffKeys.map(st => {
+      const stT = SALES_DATA.staff_total[st]||0;
+      const stC = SALES_DATA.staff_cnt[st]||0;
+      const stAvg = stC ? (stT/stC).toFixed(4) : '—';
+      const typeVals = AD_TYPES_LIST2.map(t => {
+        const v = (SALES_DATA.staff_type[st]||{})[t]||0;
+        return v ? `<td>${v.toFixed(v%1===0?1:4)}</td>` : '<td>—</td>';
+      }).join('');
+      const c = STAFF_COLORS2[st]||'var(--tx)';
+      return `<tr><td style="color:${c};font-weight:500">${st}</td><td>${stC}</td><td style="color:var(--gn);font-weight:600">${stT.toFixed(4)}</td><td>${stAvg}</td>${typeVals}</tr>`;
+    }).join('');
+  }
+  if(s('ssum-cnt')) s('ssum-cnt').textContent = SALES_DATA.cnt;
+  if(s('ssum-total')) s('ssum-total').textContent = SALES_DATA.total.toFixed(4);
+  if(s('ssum-avg')) s('ssum-avg').textContent = SALES_DATA.cnt ? (SALES_DATA.total/SALES_DATA.cnt).toFixed(4) : '—';
+  AD_TYPES_LIST2.forEach((t, i) => { const el=s('ssum-t'+i); if(el) el.textContent=(SALES_DATA.type_total[t]||0).toFixed(4); });
+
+  // ── 广告类型页 KPI 卡片 ──
+  const makeTypeKpi = t => {
+    const v = SALES_DATA.type_total[t]||0;
+    const pct = total ? (v/total*100).toFixed(1) : '0.0';
+    return `<div class="kp"><div class="kp-l">${t}</div><div class="kp-v">¥${v.toFixed(2)}万</div><div class="kp-s">占比 ${pct}%</div></div>`;
+  };
+  const r1=s('type-kpi-row1'); if(r1) r1.innerHTML=['棋牌','炮台','播放器','直播'].map(makeTypeKpi).join('');
+  const r2=s('type-kpi-row2'); if(r2) r2.innerHTML=['天马','游戏','春药'].map(makeTypeKpi).join('');
+
+  // ── 明细页合计行 ──
+  const footCnt=s('detail-foot-cnt'); if(footCnt) footCnt.textContent='合计（'+SALES_DATA.cnt+'条）';
+  const footTot=s('detail-foot-total'); if(footTot) footTot.textContent='¥'+SALES_DATA.total.toFixed(4)+'万';
 }
 
 
