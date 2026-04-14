@@ -1402,7 +1402,7 @@ function stopAprAutoRefresh() {
 function fetchAndApplyApr() {
   const statusEl = document.getElementById('apr-sync-status');
   if (statusEl) statusEl.textContent = '拉取中...';
-  fetch(APR_PROXY + '?id=' + APR_SHEET_ID + '&gid=0', {redirect: 'follow'})
+  fetch(APR_PROXY + '?id=' + APR_SHEET_ID + '&gid=0')
     .then(r => { if (!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
     .then(text => {
       const records = parseSheetCsv(text, 'apr');
@@ -1443,28 +1443,31 @@ function parseSheetCsv(text, month) {
   if (!rawRows.length) return [];
   let hdrIdx = -1;
   for (let i = 0; i < Math.min(rawRows.length, 10); i++) {
-    if (rawRows[i].includes('姓名') && rawRows[i].some(c => c && (c.includes('销售时间') || c.includes('广告费用')))) {
-      hdrIdx = i; break;
-    }
+    const row = rawRows[i];
+    // 兼容两种表头格式
+    const hasStaff = row.some(c => c && (c.includes('姓名') || c.includes('商务对接人')));
+    const hasAmt = row.some(c => c && (c.includes('广告费用') || c.includes('广告金额')));
+    const hasDate = row.some(c => c && (c.includes('销售时间') || c.includes('投放时间')));
+    if (hasStaff && (hasAmt || hasDate)) { hdrIdx = i; break; }
   }
   if (hdrIdx < 0) return [];
   const hdr = rawRows[hdrIdx];
-  const idxOf = k => hdr.findIndex(h => h && h.includes(k));
-  const staffIdx  = idxOf('姓名');
-  const dateIdx   = idxOf('销售时间');
-  const clientIdx = idxOf('广告主昵称');
-  const amtIdx    = idxOf('广告费用');
+  const idxOf = (...keys) => hdr.findIndex(h => h && keys.some(k => h.includes(k)));
+  const staffIdx  = idxOf('姓名', '商务对接人');
+  const dateIdx   = idxOf('销售时间', '投放时间');
+  const clientIdx = idxOf('广告主昵称', '广告名称');
+  const amtIdx    = idxOf('广告费用', '广告金额(RMB)', '广告金额');
   const typeIdx   = idxOf('广告类型');
-  const modelIdx  = idxOf('广告模式');
-  const groupIdx  = idxOf('广告群');
+  const modelIdx  = idxOf('广告模式', '合作模式');
+  const groupIdx  = idxOf('广告群', '群名称');
   const newOldIdx = idxOf('新老');
   const records = [];
   for (let i = hdrIdx + 1; i < rawRows.length; i++) {
     const row = rawRows[i];
-    if (!row[0] || !/^\d+$/.test(row[0].trim())) continue;
+    if (!row[0] || !/^\d+/.test(row[0].trim())) continue;
     const amt = numVal(row[amtIdx] || '') / unitDiv;
     if (!amt) continue;
-    let staff = staffIdx >= 0 ? row[staffIdx] : '';
+    let staff = staffIdx >= 0 ? row[staffIdx].trim() : '';
     if (staff === '康泽') staff = '刘星宇';
     records.push({
       id: 'gs'+i,
