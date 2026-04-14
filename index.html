@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -88,6 +88,17 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <button class="nb" onclick="go('trend')">📈 趋势分析</button>
     <button class="nb" onclick="go('detail')">📋 明细记录</button>
   </nav>
+</div>
+<!-- 4月实时同步状态栏（切换到4月时显示） -->
+<div id="apr-sync-bar" style="display:none;background:rgba(99,102,241,.08);border-bottom:1px solid rgba(99,102,241,.2);padding:6px 22px;display:none;align-items:center;justify-content:space-between">
+  <div style="display:flex;align-items:center;gap:8px">
+    <span style="font-family:var(--mo);font-size:10px;color:#818cf8">📡 4月数据</span>
+    <span id="apr-sync-status" style="font-family:var(--mo);font-size:10px;color:var(--gn)"></span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="apr-sync-countdown" style="font-family:var(--mo);font-size:10px;color:var(--t3)"></span>
+    <button onclick="manualRefreshApr()" style="font-family:var(--mo);font-size:10px;padding:3px 12px;background:var(--acl);border:1px solid rgba(99,102,241,.3);color:var(--ac);border-radius:5px;cursor:pointer">▶ 立即刷新</button>
+  </div>
 </div>
 <div class="main">
 
@@ -1344,88 +1355,88 @@ const GC='rgba(255,255,255,0.04)',TC='#4a5275';
 let currentMonth = 'mar';
 const MONTH_LABELS   = {mar:'3月', apr:'4月'};
 const MONTH_KEYS     = {mar:'pay_records_mar', apr:'pay_records_apr'};
-const MONTH_TARGETS  = {mar:1800, apr:2100};   // 万元
-const MONTH_UNIT_DIV = {mar:1, apr:10000};     // 4月CSV单位是元，需除以10000转万
+const MONTH_TARGETS  = {mar:1800, apr:2100};
+const MONTH_UNIT_DIV = {mar:1, apr:10000};
 
+// ══ 4月自动刷新 ══
+const APR_PROXY = 'https://script.google.com/macros/s/AKfycbyvcCDhGdyBgGYk2G49Lzzdn6fNz26i4pjBPMMXKQsKYf92sK1XbdCAuXIlLZKfgwQMUA/exec';
+const APR_SHEET_ID = '1jnWbeqBCqvb5Goq8_N96NbsAVhVTPYNuI0yW3lEd9_A';
+const APR_REFRESH_MS = 5 * 60 * 1000;
+let aprRefreshTimer = null;
+let aprCountdownTimer = null;
+let aprNextRefreshTime = null;
 
+function updateAprCountdown() {
+  const el = document.getElementById('apr-sync-countdown');
+  if (!el || !aprNextRefreshTime) return;
+  const remaining = Math.max(0, Math.ceil((aprNextRefreshTime - Date.now()) / 1000));
+  const m = Math.floor(remaining / 60);
+  const s = remaining % 60;
+  el.textContent = m + ':' + String(s).padStart(2,'0') + ' 后自动刷新';
+}
 
-function switchMonth(m) {
-  if (currentMonth === m) return;
-  currentMonth = m;
-  const lbl = MONTH_LABELS[m];
-  ['mar','apr'].forEach(k => {
-    const btn = document.getElementById('btn-'+k);
-    if (!btn) return;
-    if (k===m){btn.style.background='var(--acl)';btn.style.color='var(--ac)';btn.style.borderColor='rgba(99,102,241,.4)';}
-    else{btn.style.background='transparent';btn.style.color='var(--t3)';btn.style.borderColor='var(--b1)';}
-  });
-  const setT=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
-  setT('hd-title',         '商务数据看板 · '+lbl);
-  setT('hd-badge',         '2026年'+lbl+' · 含CPA投放');
-  setT('csv-upload-title', '上传收款明细 CSV（'+lbl+'）');
-  setT('sec-ov',           lbl+'核心经营指标');
-  setT('kp-total-label',   lbl+'总广告费用');
-  setT('tgt-month-label',  lbl+'目标达成情况');
-  setT('cpa-month-label',  lbl+'CPA总消耗');
-  setT('cpa-daily-label',  lbl+'每日CPA消耗');
-  // CPA投放页重新拉取（月份变了，isMarch26会用新月份过滤）
-  liveStatus.loaded = false;
-  liveStatus.loading = false;
-  liveCpaRows = [];
-  if (document.getElementById('p-cpa').classList.contains('on')) {
-    startAutoRefresh();
-  }
-  // 读取该月数据
-  const statusEl = document.getElementById('pay-csv-status');
-  if (m === 'apr') {
-    // 4月：优先从 Apps Script 实时拉取
-    const PROXY = 'https://script.google.com/macros/s/AKfycbyvcCDhGdyBgGYk2G49Lzzdn6fNz26i4pjBPMMXKQsKYf92sK1XbdCAuXIlLZKfgwQMUA/exec';
-    const SHEET_ID = '1jnWbeqBCqvb5Goq8_N96NbsAVhVTPYNuI0yW3lEd9_A';
-    if (statusEl) statusEl.textContent = '正在拉取4月最新数据...';
-    fetch(PROXY + '?id=' + SHEET_ID + '&gid=0')
-      .then(r => { if (!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
-      .then(text => {
-        const records = parseSheetCsv(text, 'apr');
-        if (records && records.length) {
-          try { localStorage.setItem(MONTH_KEYS['apr'], JSON.stringify(records)); } catch(e) {}
-          PAY = records;
-          rebuildSalesData(records);
-          document.querySelectorAll('.no-data-overlay').forEach(el => el.remove());
-          refreshAll();
-          const t = records.reduce((s,r)=>s+r.amount,0);
-          if (statusEl) statusEl.textContent = '✓ 已从线上拉取 '+records.length+' 条（4月），合计 ¥'+t.toFixed(2)+'万';
-        } else throw new Error('无有效数据');
-      })
-      .catch(err => {
-        console.warn('4月数据拉取失败，使用缓存/默认数据:', err);
-        const saved = localStorage.getItem(MONTH_KEYS['apr']);
-        let records = null;
-        if (saved) { try { records = JSON.parse(saved); } catch(e) {} }
-        if (!records || !records.length) records = DEFAULT_APR_RECORDS;
+function manualRefreshApr() {
+  if (currentMonth !== 'apr') return;
+  fetchAndApplyApr();
+  aprNextRefreshTime = Date.now() + APR_REFRESH_MS;
+}
+
+function startAprAutoRefresh() {
+  if (aprRefreshTimer) clearInterval(aprRefreshTimer);
+  if (aprCountdownTimer) clearInterval(aprCountdownTimer);
+  fetchAndApplyApr();
+  aprRefreshTimer = setInterval(() => {
+    fetchAndApplyApr();
+    aprNextRefreshTime = Date.now() + APR_REFRESH_MS;
+  }, APR_REFRESH_MS);
+  aprNextRefreshTime = Date.now() + APR_REFRESH_MS;
+  aprCountdownTimer = setInterval(updateAprCountdown, 1000);
+  updateAprCountdown();
+}
+
+function stopAprAutoRefresh() {
+  if (aprRefreshTimer) { clearInterval(aprRefreshTimer); aprRefreshTimer = null; }
+  if (aprCountdownTimer) { clearInterval(aprCountdownTimer); aprCountdownTimer = null; }
+}
+
+function fetchAndApplyApr() {
+  const statusEl = document.getElementById('apr-sync-status');
+  if (statusEl) statusEl.textContent = '拉取中...';
+  fetch(APR_PROXY + '?id=' + APR_SHEET_ID + '&gid=0')
+    .then(r => { if (!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+    .then(text => {
+      const records = parseSheetCsv(text, 'apr');
+      if (!records || !records.length) throw new Error('无有效数据');
+      try { localStorage.setItem(MONTH_KEYS['apr'], JSON.stringify(records)); } catch(e) {}
+      if (currentMonth === 'apr') {
         PAY = records;
         rebuildSalesData(records);
         document.querySelectorAll('.no-data-overlay').forEach(el => el.remove());
         refreshAll();
         const t = records.reduce((s,r)=>s+r.amount,0);
-        if (statusEl) statusEl.textContent = '✓ 已加载 '+records.length+' 条（4月缓存），合计 ¥'+t.toFixed(2)+'万';
-      });
-  } else {
-    // 3月：用 localStorage 缓存或默认数据
-    const saved = localStorage.getItem(MONTH_KEYS[m]);
-    let records = null;
-    if (saved) { try { records = JSON.parse(saved); } catch(e) {} }
-    if (!records || !records.length) records = DEFAULT_MAR_RECORDS;
-    if (records && records.length) {
-      PAY = records;
-      rebuildSalesData(records);
-      document.querySelectorAll('.no-data-overlay').forEach(el => el.remove());
-      refreshAll();
-      const t = records.reduce((s,r)=>s+r.amount,0);
-      if (statusEl) statusEl.textContent = '✓ 已加载 '+records.length+' 条（'+lbl+'），合计 ¥'+t.toFixed(2)+'万';
-    }
-  }
+        const payEl = document.getElementById('pay-csv-status');
+        if (payEl) payEl.textContent = '✓ 已加载 '+records.length+' 条（4月），合计 ¥'+t.toFixed(2)+'万';
+      }
+      const now = new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+      if (statusEl) statusEl.textContent = '✓ ' + now + ' 已更新';
+    })
+    .catch(err => {
+      console.warn('4月数据拉取失败，使用缓存/默认:', err);
+      if (statusEl) statusEl.textContent = '⚠ 拉取失败，使用本地数据';
+      if (currentMonth === 'apr') {
+        const saved = localStorage.getItem(MONTH_KEYS['apr']);
+        let records = null;
+        if (saved) { try { records = JSON.parse(saved); } catch(e) {} }
+        if (!records || !records.length) records = DEFAULT_APR_RECORDS;
+        if (records && records.length) {
+          PAY = records;
+          rebuildSalesData(records);
+          refreshAll();
+        }
+      }
+    });
 }
-// ══ 解析从 Apps Script 返回的 CSV（4月数据，单位为元）══
+
 function parseSheetCsv(text, month) {
   const unitDiv = MONTH_UNIT_DIV[month] || 1;
   const rawRows = parseCSVRaw(text);
@@ -1470,6 +1481,55 @@ function parseSheetCsv(text, month) {
   return records;
 }
 
+
+
+function switchMonth(m) {
+  if (currentMonth === m) return;
+  currentMonth = m;
+  const lbl = MONTH_LABELS[m];
+  ['mar','apr'].forEach(k => {
+    const btn = document.getElementById('btn-'+k);
+    if (!btn) return;
+    if (k===m){btn.style.background='var(--acl)';btn.style.color='var(--ac)';btn.style.borderColor='rgba(99,102,241,.4)';}
+    else{btn.style.background='transparent';btn.style.color='var(--t3)';btn.style.borderColor='var(--b1)';}
+  });
+  const setT=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
+  setT('hd-title',         '商务数据看板 · '+lbl);
+  setT('hd-badge',         '2026年'+lbl+' · 含CPA投放');
+  setT('csv-upload-title', '上传收款明细 CSV（'+lbl+'）');
+  setT('sec-ov',           lbl+'核心经营指标');
+  setT('kp-total-label',   lbl+'总广告费用');
+  setT('tgt-month-label',  lbl+'目标达成情况');
+  setT('cpa-month-label',  lbl+'CPA总消耗');
+  setT('cpa-daily-label',  lbl+'每日CPA消耗');
+  // 同步状态栏显示/隐藏
+  const syncBar = document.getElementById('apr-sync-bar');
+  if (syncBar) syncBar.style.display = m === 'apr' ? 'flex' : 'none';
+  // CPA投放页重新拉取
+  liveStatus.loaded = false;
+  liveStatus.loading = false;
+  liveCpaRows = [];
+  if (document.getElementById('p-cpa').classList.contains('on')) startAutoRefresh();
+  // 4月启动自动刷新，3月停止并加载缓存/默认数据
+  if (m === 'apr') {
+    startAprAutoRefresh();
+  } else {
+    stopAprAutoRefresh();
+    const statusEl = document.getElementById('pay-csv-status');
+    const saved = localStorage.getItem(MONTH_KEYS['mar']);
+    let records = null;
+    if (saved) { try { records = JSON.parse(saved); } catch(e) {} }
+    if (!records || !records.length) records = DEFAULT_MAR_RECORDS;
+    if (records && records.length) {
+      PAY = records;
+      rebuildSalesData(records);
+      document.querySelectorAll('.no-data-overlay').forEach(el => el.remove());
+      refreshAll();
+      const t = records.reduce((s,r)=>s+r.amount,0);
+      if (statusEl) statusEl.textContent = '✓ 已加载 '+records.length+' 条（3月），合计 ¥'+t.toFixed(2)+'万';
+    }
+  }
+}
 const TIP={backgroundColor:'#111220',borderColor:'#1c1e32',borderWidth:1,titleColor:'#94a3b8',bodyColor:'#e2e8f0',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},padding:10,boxWidth:8,boxHeight:8};
 function numVal(v) { if(!v&&v!==0) return 0; return parseFloat(String(v).replace(/[,，¥￥\s]/g,''))||0; }
 function uid() { return Math.random().toString(36).slice(2,9); }
