@@ -1375,25 +1375,101 @@ function switchMonth(m) {
   if (document.getElementById('p-cpa').classList.contains('on')) {
     startAutoRefresh();
   }
-  // 读取该月数据：优先localStorage缓存，没有则用默认数据
+  // 读取该月数据
   const statusEl = document.getElementById('pay-csv-status');
-  const saved = localStorage.getItem(MONTH_KEYS[m]);
-  let records = null;
-  if (saved) {
-    try { records = JSON.parse(saved); } catch(e) {}
-  }
-  if (!records || !records.length) {
-    records = m === 'apr' ? DEFAULT_APR_RECORDS : DEFAULT_MAR_RECORDS;
-  }
-  if (records && records.length) {
-    PAY = records;
-    rebuildSalesData(records);
-    document.querySelectorAll('.no-data-overlay').forEach(el => el.remove());
-    refreshAll();
-    const t = records.reduce((s,r)=>s+r.amount,0);
-    if (statusEl) statusEl.textContent = '✓ 已加载 '+records.length+' 条（'+lbl+'），合计 ¥'+t.toFixed(2)+'万';
+  if (m === 'apr') {
+    // 4月：优先从 Apps Script 实时拉取
+    const PROXY = 'https://script.google.com/macros/s/AKfycbyvcCDhGdyBgGYk2G49Lzzdn6fNz26i4pjBPMMXKQsKYf92sK1XbdCAuXIlLZKfgwQMUA/exec';
+    const SHEET_ID = '1jnWbeqBCqvb5Goq8_N96NbsAVhVTPYNuI0yW3lEd9_A';
+    if (statusEl) statusEl.textContent = '正在拉取4月最新数据...';
+    fetch(PROXY + '?id=' + SHEET_ID + '&gid=0')
+      .then(r => { if (!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+      .then(text => {
+        const records = parseSheetCsv(text, 'apr');
+        if (records && records.length) {
+          try { localStorage.setItem(MONTH_KEYS['apr'], JSON.stringify(records)); } catch(e) {}
+          PAY = records;
+          rebuildSalesData(records);
+          document.querySelectorAll('.no-data-overlay').forEach(el => el.remove());
+          refreshAll();
+          const t = records.reduce((s,r)=>s+r.amount,0);
+          if (statusEl) statusEl.textContent = '✓ 已从线上拉取 '+records.length+' 条（4月），合计 ¥'+t.toFixed(2)+'万';
+        } else throw new Error('无有效数据');
+      })
+      .catch(err => {
+        console.warn('4月数据拉取失败，使用缓存/默认数据:', err);
+        const saved = localStorage.getItem(MONTH_KEYS['apr']);
+        let records = null;
+        if (saved) { try { records = JSON.parse(saved); } catch(e) {} }
+        if (!records || !records.length) records = DEFAULT_APR_RECORDS;
+        PAY = records;
+        rebuildSalesData(records);
+        document.querySelectorAll('.no-data-overlay').forEach(el => el.remove());
+        refreshAll();
+        const t = records.reduce((s,r)=>s+r.amount,0);
+        if (statusEl) statusEl.textContent = '✓ 已加载 '+records.length+' 条（4月缓存），合计 ¥'+t.toFixed(2)+'万';
+      });
+  } else {
+    // 3月：用 localStorage 缓存或默认数据
+    const saved = localStorage.getItem(MONTH_KEYS[m]);
+    let records = null;
+    if (saved) { try { records = JSON.parse(saved); } catch(e) {} }
+    if (!records || !records.length) records = DEFAULT_MAR_RECORDS;
+    if (records && records.length) {
+      PAY = records;
+      rebuildSalesData(records);
+      document.querySelectorAll('.no-data-overlay').forEach(el => el.remove());
+      refreshAll();
+      const t = records.reduce((s,r)=>s+r.amount,0);
+      if (statusEl) statusEl.textContent = '✓ 已加载 '+records.length+' 条（'+lbl+'），合计 ¥'+t.toFixed(2)+'万';
+    }
   }
 }
+// ══ 解析从 Apps Script 返回的 CSV（4月数据，单位为元）══
+function parseSheetCsv(text, month) {
+  const unitDiv = MONTH_UNIT_DIV[month] || 1;
+  const rawRows = parseCSVRaw(text);
+  if (!rawRows.length) return [];
+  let hdrIdx = -1;
+  for (let i = 0; i < Math.min(rawRows.length, 10); i++) {
+    if (rawRows[i].includes('姓名') && rawRows[i].some(c => c && (c.includes('销售时间') || c.includes('广告费用')))) {
+      hdrIdx = i; break;
+    }
+  }
+  if (hdrIdx < 0) return [];
+  const hdr = rawRows[hdrIdx];
+  const idxOf = k => hdr.findIndex(h => h && h.includes(k));
+  const staffIdx  = idxOf('姓名');
+  const dateIdx   = idxOf('销售时间');
+  const clientIdx = idxOf('广告主昵称');
+  const amtIdx    = idxOf('广告费用');
+  const typeIdx   = idxOf('广告类型');
+  const modelIdx  = idxOf('广告模式');
+  const groupIdx  = idxOf('广告群');
+  const newOldIdx = idxOf('新老');
+  const records = [];
+  for (let i = hdrIdx + 1; i < rawRows.length; i++) {
+    const row = rawRows[i];
+    if (!row[0] || !/^\d+$/.test(row[0].trim())) continue;
+    const amt = numVal(row[amtIdx] || '') / unitDiv;
+    if (!amt) continue;
+    let staff = staffIdx >= 0 ? row[staffIdx] : '';
+    if (staff === '康泽') staff = '刘星宇';
+    records.push({
+      id: 'gs'+i,
+      date:   dateIdx   >= 0 ? (row[dateIdx]||'').slice(0,10) : '',
+      staff,
+      client: clientIdx >= 0 ? row[clientIdx] : '',
+      amount: Math.round(amt * 10000) / 10000,
+      adType: typeIdx   >= 0 ? row[typeIdx]   : '',
+      model:  modelIdx  >= 0 ? row[modelIdx]  : '',
+      group:  groupIdx  >= 0 ? row[groupIdx]  : '',
+      newOld: newOldIdx >= 0 ? row[newOldIdx] : '',
+    });
+  }
+  return records;
+}
+
 const TIP={backgroundColor:'#111220',borderColor:'#1c1e32',borderWidth:1,titleColor:'#94a3b8',bodyColor:'#e2e8f0',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},padding:10,boxWidth:8,boxHeight:8};
 function numVal(v) { if(!v&&v!==0) return 0; return parseFloat(String(v).replace(/[,，¥￥\s]/g,''))||0; }
 function uid() { return Math.random().toString(36).slice(2,9); }
